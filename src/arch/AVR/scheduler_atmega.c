@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-
+#include <avr8-stubs-utilities.h>
 #include <attos.h>
 
 
@@ -51,7 +51,7 @@ void attos_scheduler_init(unsigned int aiBursts)
       else {
          // TODO: Kernel panic - Unable to configure timer
       }
-      
+
       sei();
    } else {
       // Unable to configure the timer - Throw an error
