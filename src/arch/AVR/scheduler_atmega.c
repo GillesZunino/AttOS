@@ -8,7 +8,7 @@
 #define CLOCK_TICKS_PER_BURST 1000
 
 
-unsigned int get_timer0b_prescaler(unsigned int iTicks);
+long get_timer0b_prescaler(unsigned int iTicks);
 void set_timer0b_prescaler(unsigned int preScaler);
 
 
@@ -39,20 +39,26 @@ void attos_scheduler_init(unsigned int aiBursts)
       // Clear the Pre-Scaler bits. See atmel manual 19.9.2
       TCCR0B &= (0xF8);
       
-      unsigned int prescaler = get_timer0b_prescaler(iTicks);
-      set_timer0b_prescaler(prescaler);
+      long prescaler = get_timer0b_prescaler(iTicks);
+      if (prescaler > 0) {
+         // TODO: test for 0 indicating it failed
+         set_timer0b_prescaler(prescaler);
 
-      // Set the compare value for timer 0 to aiTicks
-      // See manual 19.9.6
-      OCR0A =  (iTicks / prescaler) & 0xFF;
-
+         // Set the compare value for timer 0 to aiTicks
+         // See manual 19.9.6
+         OCR0A =  (iTicks / prescaler) & 0xFF;
+      }
+      else {
+         // TODO: Kernel panic - Unable to configure timer
+      }
+      
       sei();
    } else {
       // Unable to configure the timer - Throw an error
    }
 }
 
-unsigned int get_timer0b_prescaler(unsigned int iTicks)
+long get_timer0b_prescaler(unsigned int iTicks)
 {
    if (iTicks < 256)
    {
@@ -79,6 +85,8 @@ unsigned int get_timer0b_prescaler(unsigned int iTicks)
       // Set Pre-scaler to 1024
       return 1024;
    }
+
+   return -1;
 }
 
 void set_timer0b_prescaler(unsigned int preScaler)
